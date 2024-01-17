@@ -50,8 +50,79 @@ var  _descEditingController = TextEditingController();
                       trailing:  Container(
                         width: 80,
                         child: Row(
-                          children: [ IconButton(onPressed: (){}, icon: Icon(Icons.edit)),
-                          IconButton(onPressed: (){}, icon: Icon(Icons.delete,color: Colors.red.shade400,)) ],),
+                          children: [ IconButton(onPressed: (){
+
+
+
+                            showModalBottomSheet(context: context, builder: (context) {
+                              _titleEditingController.text = NoteModel.fromMap(snapShot.data!.docs[index].data()).title;
+                              _descEditingController.text = NoteModel.fromMap(snapShot.data!.docs[index].data()).desc;
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(children: [
+                                    SizedBox(height: 30.0),
+                                    Text("Add New Notes",style: TextStyle(color: Colors.green,fontSize: 30),),
+
+                                    SizedBox(height: 20.0),
+                                    /// title
+                                    TextField(
+                                      controller: _titleEditingController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Enter note title',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                    SizedBox(height: 16.0),
+
+                                    ///desc
+                                    TextField(
+                                      controller: _descEditingController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Enter note desc.',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                    SizedBox(height: 16.0),
+
+
+                                    ElevatedButton(onPressed: (){
+                                        firestore.collection("users").doc(widget.userID).collection("notes").doc(snapShot.data!.docs[index].id).update(NoteModel(title: _titleEditingController.text , desc: _descEditingController.text).toMap());
+
+                                     /* var collRef = firestore.collection("users");
+                                      collRef.doc(widget.userID).collection("notes").add(NoteModel(title: _titleEditingController.text , desc: _descEditingController.text).toMap()
+                                        *//*{"title": "this is notes title",
+        "desc":"this is notes des" }*//*)
+                                          .then((value) => "Note added : $value")
+                                          .catchError((e){
+                                        return "Note not added";
+                                      });*/ setState(() {
+                                        _titleEditingController.clear();
+                                        _descEditingController.clear();
+                                        Navigator.pop(context);
+                                      });
+                                    },
+                                        child: Text("    Save    ")
+                                    ),
+
+                                  ],),
+                                );
+                              },);
+
+
+
+
+                          }, icon: Icon(Icons.edit)),
+                          IconButton(onPressed: (){
+                            firestore.collection("users").doc(widget.userID).collection("notes").doc(snapShot.data!.docs[index].id).delete();
+                          /* showModalBottomSheet(context: context, builder: (context) {
+                             return Container(
+
+                             );
+                           },);*/
+                            setState(() {
+                              
+                            });
+                          }, icon: Icon(Icons.delete,color: Colors.red.shade400,)) ],),
                       ),
                     );
                   },),
@@ -128,7 +199,6 @@ Text("Add New Notes",style: TextStyle(color: Colors.green,fontSize: 30),),
     );
   },);
   }
-
   Widget drawer(){
   return Drawer(elevation: 5, child: Column(
 
