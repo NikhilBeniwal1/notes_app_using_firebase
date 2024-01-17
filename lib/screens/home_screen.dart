@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app_firebase/model/note_model.dart';
+import 'package:notes_app_firebase/onboarding/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
+  HomeScreen({super.key, required this.userID});
+String userID;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -22,6 +24,7 @@ var  _descEditingController = TextEditingController();
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Notes app using firebase"),
+      actions: [IconButton(onPressed: (){}, icon: Icon(Icons.search))],
       centerTitle: true,
         backgroundColor: Colors.blue.shade200,
       ),
@@ -29,8 +32,8 @@ var  _descEditingController = TextEditingController();
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            /// list of notes
-            FutureBuilder<QuerySnapshot<Map<String,dynamic>>>(future: firestore.collection('notes').get() ,
+            /// list of notes  // future builder
+            FutureBuilder<QuerySnapshot<Map<String,dynamic>>>(future: firestore.collection('users').doc(widget.userID).collection("notes").get() ,
                 builder: (context, snapShot) {
               if(snapShot.connectionState == ConnectionState.waiting){ return Center(child: CircularProgressIndicator());}
               else if(snapShot.hasError){return Center(child: Text("unable to fetch notes : "));}
@@ -38,10 +41,18 @@ var  _descEditingController = TextEditingController();
                 child: ListView.builder(
                   itemCount: snapShot.data!.docs.length,
                   itemBuilder: (context, index) {
+                    NoteModel currNote = NoteModel.fromMap(snapShot.data!.docs[index].data());
+
                     return ListTile(
                       onTap: (){},
-                      title: Text("${snapShot.data!.docs[index].data()["title"]}"),
-                      subtitle: Text("${snapShot.data!.docs[index].data()["desc"]}"),
+                      title: Text("${NoteModel.fromMap(snapShot.data!.docs[index].data()).title}"),
+                      subtitle: Text("${currNote.desc}"),
+                      trailing:  Container(
+                        width: 80,
+                        child: Row(
+                          children: [ IconButton(onPressed: (){}, icon: Icon(Icons.edit)),
+                          IconButton(onPressed: (){}, icon: Icon(Icons.delete,color: Colors.red.shade400,)) ],),
+                      ),
                     );
                   },),
               );}
@@ -49,6 +60,8 @@ var  _descEditingController = TextEditingController();
 
                 }
               ),
+
+
           ],
         ),
       ),
@@ -58,6 +71,9 @@ floatingActionButton: FloatingActionButton(onPressed: (){
 child: Icon(Icons.add),
 ),
 backgroundColor: Colors.green.shade100,
+
+      drawer: drawer(),
+
     );
   }
 
@@ -92,8 +108,8 @@ Text("Add New Notes",style: TextStyle(color: Colors.green,fontSize: 30),),
 
 
         ElevatedButton(onPressed: (){
-          var collRef = firestore.collection("notes");
-          collRef.add(NoteModel(title: _titleEditingController.text , desc: _descEditingController.text).toMap()
+          var collRef = firestore.collection("users");
+          collRef.doc(widget.userID).collection("notes").add(NoteModel(title: _titleEditingController.text , desc: _descEditingController.text).toMap()
             /*{"title": "this is notes title",
         "desc":"this is notes des" }*/)
               .then((value) => "Note added : $value")
@@ -113,7 +129,48 @@ Text("Add New Notes",style: TextStyle(color: Colors.green,fontSize: 30),),
   },);
   }
 
+  Widget drawer(){
+  return Drawer(elevation: 5, child: Column(
+
+    children: [
+    InkWell(
+      onTap: () async {
+        var pref = await SharedPreferences.getInstance();
+        pref.setBool(LoginPage.LOGIN_PREF_KEY, false);
+        Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => LoginPage(),));
+
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(children: [
+          SizedBox(height: 50,),
+          Text("Log out"),Icon(Icons.logout)
+        ],),
+      ),
+    )
+  ],),);
+  }
 
 }
+// stream builder
+/*StreamBuilder<QuerySnapshot<Map<String,dynamic>>>(stream: firestore.collection('notes').snapshots() ,
+builder: (context, snapShot) {
+if(snapShot.connectionState == ConnectionState.waiting){ return Center(child: CircularProgressIndicator());}
+else if(snapShot.hasError){return Center(child: Text("unable to fetch notes : "));}
+else if(snapShot.hasData) {return Expanded(
+child: ListView.builder(
+itemCount: snapShot.data!.docs.length,
+itemBuilder: (context, index) {
+NoteModel currNote = NoteModel.fromMap(snapShot.data!.docs[index].data());
 
+return ListTile(
+onTap: (){},
+title: Text("${NoteModel.fromMap(snapShot.data!.docs[index].data()).title}"),
+subtitle: Text("${currNote.desc}"),
+);
+},),
+);}
+else{return Container();}
 
+}
+),*/

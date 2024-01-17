@@ -1,15 +1,17 @@
+import 'dart:js_interop';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_app_firebase/onboarding/signup.dart';
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+import 'package:notes_app_firebase/screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+class LoginPage extends StatelessWidget {
+  static const String LOGIN_PREF_KEY = "isLogin";
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
   var _emailControler = TextEditingController();
+
   var _passControler = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +42,37 @@ class _LoginPageState extends State<LoginPage> {
 
           ElevatedButton(
 
-              onPressed: (){},
+              onPressed: () async {
+                var auth = FirebaseAuth.instance;
+
+                try {
+                  var usercred = await  auth.signInWithEmailAndPassword(
+                        email: _emailControler.text,
+                        password: _passControler.text);
+                  /// shared pref here
+                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                       return HomeScreen(userID: usercred.user!.uid);
+                     },));
+                     // when user loged in
+                     var prefs = await SharedPreferences.getInstance();
+   prefs.setBool(LOGIN_PREF_KEY, true);
+
+                  } on FirebaseAuthException catch (e){
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error occord : $e")));
+
+                 /* if (e.code == 'weak-password') {
+                    print('The password provided is too weak.');
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("The password provided is too weak.")));
+                  } else if (e.code == 'email-already-in-use') {
+                    print('The account already exists for that email.');
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("The account already exists for that email.")));
+
+                  }*/
+                } catch (e){
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error : $e")));
+
+                }
+                },
               // style: ButtonStyle(),
               child: Text("    Save    ")
           ),
