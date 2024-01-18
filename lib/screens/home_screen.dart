@@ -38,7 +38,7 @@ var  _descEditingController = TextEditingController();
               if(snapShot.connectionState == ConnectionState.waiting){ return Center(child: CircularProgressIndicator());}
               else if(snapShot.hasError){return Center(child: Text("unable to fetch notes : "));}
               else if(snapShot.hasData) {return Expanded(
-                child: ListView.builder(
+                child: snapShot.data!.docs.isNotEmpty ? ListView.builder (
                   itemCount: snapShot.data!.docs.length,
                   itemBuilder: (context, index) {
                     NoteModel currNote = NoteModel.fromMap(snapShot.data!.docs[index].data());
@@ -52,16 +52,18 @@ var  _descEditingController = TextEditingController();
                         child: Row(
                           children: [ IconButton(onPressed: (){
 
+                            /// Update Notes from here
 
 
-                            showModalBottomSheet(context: context, builder: (context) {
+                            showModalBottomSheet(backgroundColor: Colors.yellow.shade100,isDismissible: false,context: context, builder: (context) {
+
                               _titleEditingController.text = NoteModel.fromMap(snapShot.data!.docs[index].data()).title;
                               _descEditingController.text = NoteModel.fromMap(snapShot.data!.docs[index].data()).desc;
                                 return Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(children: [
                                     SizedBox(height: 30.0),
-                                    Text("Add New Notes",style: TextStyle(color: Colors.green,fontSize: 30),),
+                                    Text("Update note",style: TextStyle(color: Colors.green,fontSize: 30),),
 
                                     SizedBox(height: 20.0),
                                     /// title
@@ -85,24 +87,62 @@ var  _descEditingController = TextEditingController();
                                     SizedBox(height: 16.0),
 
 
-                                    ElevatedButton(onPressed: (){
-                                        firestore.collection("users").doc(widget.userID).collection("notes").doc(snapShot.data!.docs[index].id).update(NoteModel(title: _titleEditingController.text , desc: _descEditingController.text).toMap());
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        ElevatedButton(onPressed: ()  {
+                                         if(_titleEditingController.text.isNotEmpty && _descEditingController.text.isNotEmpty) {
+                                                                    firestore
+                                                                        .collection(
+                                                                            "users")
+                                                                        .doc(widget
+                                                                            .userID)
+                                                                        .collection(
+                                                                            "notes")
+                                                                        .doc(snapShot
+                                                                            .data!
+                                                                            .docs[
+                                                                                index]
+                                                                            .id)
+                                                                        .update(NoteModel(title: _titleEditingController.text, desc: _descEditingController.text)
+                                                                            .toMap())
+                                                                        .then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                                            content: Text(
+                                                                                "Note Updated"))))
+                                                                        .catchError(
+                                                                            (e) {
+                                                                      return "Note not Updated";
+                                                                    });
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                    setState(
+                                                                        () {
+                                                                      _titleEditingController
+                                                                          .clear();
+                                                                      _descEditingController
+                                                                          .clear();
+                                                                    });
+                                                                  } else {
+                                         ScaffoldMessenger.of(context).showSnackBar(
+                                             SnackBar(
+                                                 backgroundColor: Colors.yellow,
+                                                 behavior: SnackBarBehavior.floating,
+                                                 margin: EdgeInsets.only(bottom: 500),
+                                                 content: Text("  Enter valid input or clik on cancle",style: TextStyle(color: Colors.black),)));
+                                         }
+                                                                },
+                                            child: Text("    Save    ",style: TextStyle(color: Colors.green),)
+                                        ),
 
-                                     /* var collRef = firestore.collection("users");
-                                      collRef.doc(widget.userID).collection("notes").add(NoteModel(title: _titleEditingController.text , desc: _descEditingController.text).toMap()
-                                        *//*{"title": "this is notes title",
-        "desc":"this is notes des" }*//*)
-                                          .then((value) => "Note added : $value")
-                                          .catchError((e){
-                                        return "Note not added";
-                                      });*/ setState(() {
-                                        _titleEditingController.clear();
-                                        _descEditingController.clear();
-                                        Navigator.pop(context);
-                                      });
-                                    },
-                                        child: Text("    Save    ")
+                                        ElevatedButton(onPressed: (){
+                                          _descEditingController.clear();
+                                          _titleEditingController.clear();
+                                         Navigator.pop(context);
+                                        }, child: Text("Cancle",style: TextStyle(color: Colors.red),))
+                                      ],
                                     ),
+
+
 
                                   ],),
                                 );
@@ -113,19 +153,43 @@ var  _descEditingController = TextEditingController();
 
                           }, icon: Icon(Icons.edit)),
                           IconButton(onPressed: (){
-                            firestore.collection("users").doc(widget.userID).collection("notes").doc(snapShot.data!.docs[index].id).delete();
-                          /* showModalBottomSheet(context: context, builder: (context) {
-                             return Container(
+                            showDialog(context: context, builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text("you are about to delete a note"),
+                                // content: ,
+                                actions: [
 
-                             );
-                           },);*/
-                            setState(() {
-                              
-                            });
+                                    ElevatedButton(
+                                        style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Colors.red)),
+
+                                        onPressed: (){
+                                      /// delete notes from here
+                                      firestore.collection("users").doc(widget.userID)
+                                          .collection("notes").doc(snapShot.data!.docs[index].id).delete()
+                                          .then((value) => Text("Note Deleted")).catchError((e) {
+                                        return "note not updated";
+                                      } );
+Navigator.pop(context);
+                                      setState(() {
+
+                                      });
+
+                                    }, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text("Delete "),Icon(Icons.delete)],) ),
+                                  SizedBox(height: 30,),
+                                  ElevatedButton(
+                                    style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Colors.green),backgroundColor: MaterialStateProperty.all(Colors.grey.shade300)),
+                                      
+                                      onPressed: (){Navigator.pop(context);}, child: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text("cancel "),Icon(Icons.cancel)],) ),
+
+
+                                ],
+                              );
+                            },);
+
                           }, icon: Icon(Icons.delete,color: Colors.red.shade400,)) ],),
                       ),
                     );
-                  },),
+                  },) : Center(child: Text("No Notes Yet!")),
               );}
               else{return Container();}
 
@@ -149,12 +213,12 @@ backgroundColor: Colors.green.shade100,
   }
 
   Future<Widget?> showModelBottomSheet (){
-  return showModalBottomSheet(context: context, builder: (context) {
+  return showModalBottomSheet(backgroundColor: Colors.yellow.shade100,isDismissible: false ,context: context, builder: (context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(children: [
         SizedBox(height: 30.0),
-Text("Add New Notes",style: TextStyle(color: Colors.green,fontSize: 30),),
+Text("Add New Notes.",style: TextStyle(color: Colors.green,fontSize: 30),),
 
         SizedBox(height: 20.0),
         /// title
@@ -178,22 +242,47 @@ Text("Add New Notes",style: TextStyle(color: Colors.green,fontSize: 30),),
         SizedBox(height: 16.0),
 
 
-        ElevatedButton(onPressed: (){
-          var collRef = firestore.collection("users");
-          collRef.doc(widget.userID).collection("notes").add(NoteModel(title: _titleEditingController.text , desc: _descEditingController.text).toMap()
-            /*{"title": "this is notes title",
-        "desc":"this is notes des" }*/)
-              .then((value) => "Note added : $value")
-              .catchError((e){
-            return "Note not added";
-          }); setState(() {
-            _titleEditingController.clear();
-            _descEditingController.clear();
-            Navigator.pop(context);
-          });
-        },
-            child: Text("    Save    ")
+        Row( mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton(onPressed: ()  {
+
+                  if(_titleEditingController.text.isNotEmpty && _descEditingController.text.isNotEmpty)  {
+                          var collRef = firestore.collection("users");
+                          collRef
+                              .doc(widget.userID)
+                              .collection("notes")
+                              .add(NoteModel(
+                                          title: _titleEditingController.text,
+                                          desc: _descEditingController.text)
+                                      .toMap()
+                                  )
+                              .then((value) => "Note added : $value")
+                              .catchError((e) {
+                            return "Note not added";
+                          });
+                          setState(() {
+                            _titleEditingController.clear();
+                            _descEditingController.clear();
+                            Navigator.pop(context);
+                          });
+                        } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: Colors.yellow,content: Text("   pls enter valid input or click on cancle",style: TextStyle(color: Colors.black),),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(bottom: 500),),);
+                  }
+                      },
+                child: Text("    Save    ",style: TextStyle(color: Colors.green),)
+            ),
+
+            ElevatedButton(onPressed: (){
+              _descEditingController.clear();
+              _titleEditingController.clear();
+              Navigator.pop(context);
+            }, child: Text("Cancle",style: TextStyle(color: Colors.red),))
+
+          ],
         ),
+
 
       ],),
     );
