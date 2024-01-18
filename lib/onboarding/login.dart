@@ -73,8 +73,8 @@ class LoginPage extends StatelessWidget {
 
                 }
                 },
-              // style: ButtonStyle(),
-              child: Text("    Save    ")
+               style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.green.shade400),foregroundColor: MaterialStateProperty.all(Colors.white)),
+              child: Text("      Login Now       ")
           ),
 SizedBox(height: 20,),
           Divider(),

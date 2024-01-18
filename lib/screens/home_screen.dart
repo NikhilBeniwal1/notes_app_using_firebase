@@ -33,7 +33,7 @@ var  _descEditingController = TextEditingController();
         child: Column(
           children: [
             /// list of notes  // future builder
-            FutureBuilder<QuerySnapshot<Map<String,dynamic>>>(future: firestore.collection('users').doc(widget.userID).collection("notes").get() ,
+            FutureBuilder<QuerySnapshot<Map<String,dynamic>>>(future: firestore.collection('users').doc(widget.userID).collection("notes").orderBy("time",descending: true).get() ,
                 builder: (context, snapShot) {
               if(snapShot.connectionState == ConnectionState.waiting){ return Center(child: CircularProgressIndicator());}
               else if(snapShot.hasError){return Center(child: Text("unable to fetch notes : "));}
@@ -45,7 +45,7 @@ var  _descEditingController = TextEditingController();
 
                     return ListTile(
                       onTap: (){},
-                      title: Text("${NoteModel.fromMap(snapShot.data!.docs[index].data()).title}"),
+                      title: Text("${currNote.title}"),
                       subtitle: Text("${currNote.desc}"),
                       trailing:  Container(
                         width: 80,
@@ -104,7 +104,7 @@ var  _descEditingController = TextEditingController();
                                                                             .docs[
                                                                                 index]
                                                                             .id)
-                                                                        .update(NoteModel(title: _titleEditingController.text, desc: _descEditingController.text)
+                                                                        .update(NoteModel(title: _titleEditingController.text, desc: _descEditingController.text,  time: "${DateTime.now().microsecondsSinceEpoch}",)
                                                                             .toMap())
                                                                         .then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                                                             content: Text(
@@ -253,7 +253,9 @@ Text("Add New Notes.",style: TextStyle(color: Colors.green,fontSize: 30),),
                               .collection("notes")
                               .add(NoteModel(
                                           title: _titleEditingController.text,
-                                          desc: _descEditingController.text)
+                                          desc: _descEditingController.text,
+                          time: "${DateTime.now().microsecondsSinceEpoch}",
+                          )
                                       .toMap()
                                   )
                               .then((value) => "Note added : $value")

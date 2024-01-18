@@ -87,7 +87,8 @@ class _SignUpState extends State<SignUp> {
                 }
 
               },
-              child: Text("    Save    ")
+              style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.green.shade400),foregroundColor: MaterialStateProperty.all(Colors.white)),
+              child: Text("    Create Account   ")
           ),
 
           Divider(),
