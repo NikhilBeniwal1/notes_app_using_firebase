@@ -25,30 +25,17 @@ class _SplashPageState extends State<SplashPage> {
 
       bool? checkLogin = prefs.getBool(LoginPage.LOGIN_PREF_KEY);
 
-      Widget navigateTo = LoginPage();
+      Widget navigateTO = LoginPage();
 
 
       if(checkLogin!=null && checkLogin){
-        navigateTo = HomeScreen(userID: auth.currentUser!.uid);
+        navigateTO = HomeScreen(userID: auth.currentUser!.uid);
       }
-
-      /*if(checkLogin==null){
-        //login
-        navigateTo = LoginPage();
-      } else {
-        if(checkLogin){
-          //home
-          navigateTo = HomePage();
-        } else {
-          //login
-          navigateTo = LoginPage();
-        }
-      }*/
 
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => navigateTo,
+            builder: (context) => navigateTO,
           ));
     });
   }
