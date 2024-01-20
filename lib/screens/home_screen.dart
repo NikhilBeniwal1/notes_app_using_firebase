@@ -313,7 +313,7 @@ Text("Add New Notes.",style: TextStyle(color: Colors.green,fontSize: 30),),
   }
 
 }
-// stream builder
+// stream builder example code
 /*StreamBuilder<QuerySnapshot<Map<String,dynamic>>>(stream: firestore.collection('notes').snapshots() ,
 builder: (context, snapShot) {
 if(snapShot.connectionState == ConnectionState.waiting){ return Center(child: CircularProgressIndicator());}

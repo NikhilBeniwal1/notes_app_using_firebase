@@ -1,7 +1,9 @@
-import 'dart:js_interop';
+
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'package:notes_app_firebase/onboarding/phone_screen.dart';
 import 'package:notes_app_firebase/onboarding/signup.dart';
 import 'package:notes_app_firebase/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,6 +80,19 @@ class LoginPage extends StatelessWidget {
           ),
 SizedBox(height: 20,),
           Divider(),
+          Text("Or",style: TextStyle(color: Colors.black),),
+
+          SizedBox(height: 20,),
+
+          InkWell(
+              onTap: (){
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+              return    EnterPhoneNO();
+                },));
+              },
+              child: Text("You can Login with OTP",style: TextStyle(color: Colors.blue),)),
+
+          Divider(),
           SizedBox(
             height: 50,
             width: MediaQuery.of(context).size.width,
@@ -87,7 +102,7 @@ SizedBox(height: 20,),
               Text("if you don't have and account  "),
               InkWell(
                   onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
                       return SignUp();
                     },));
                   },
@@ -101,3 +116,9 @@ SizedBox(height: 20,),
     );
   }
 }
+
+
+
+
+////
+

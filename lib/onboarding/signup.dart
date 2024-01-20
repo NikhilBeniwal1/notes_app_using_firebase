@@ -14,7 +14,9 @@ class _SignUpState extends State<SignUp> {
   var _emailControler = TextEditingController();
   var _passControler = TextEditingController();
   var _nameControler = TextEditingController();
-
+  TextEditingController  _phoneControler = TextEditingController();
+  TextEditingController  _otpControler = TextEditingController();
+  late String mVerificationID;
   @override
   Widget build(BuildContext context) {
 
@@ -32,7 +34,7 @@ class _SignUpState extends State<SignUp> {
             ),
           ),
           SizedBox(height: 20,),
-          SizedBox(height: 20,),
+
           TextField(
             controller: _nameControler,
             decoration: InputDecoration(
@@ -40,7 +42,7 @@ class _SignUpState extends State<SignUp> {
               border: OutlineInputBorder(),
             ),
           ),
-          SizedBox(height: 20,),
+
           SizedBox(height: 20,),
           TextField(
             controller: _passControler,
@@ -49,6 +51,60 @@ class _SignUpState extends State<SignUp> {
               border: OutlineInputBorder(),
             ),
           ),
+          SizedBox(height: 20,),
+          /// Send OTP
+          Container(child: Row(children: [
+            SizedBox( width: MediaQuery.of(context).size.width *0.70 ,
+              child: TextField(
+                controller: _phoneControler,
+                decoration: InputDecoration(
+                  labelText: 'Enter Mobile no',
+                  border: OutlineInputBorder(),
+                ),
+              ),),
+            SizedBox(width: 10,),
+
+            ElevatedButton(onPressed: () async {
+              await FirebaseAuth.instance.verifyPhoneNumber(
+                verificationCompleted: (PhoneAuthCredential credential){},
+                verificationFailed: (FirebaseAuthException ex){ },
+                codeSent: (String verificationid, int? tockenId){
+                  mVerificationID = verificationid;
+
+                },
+                codeAutoRetrievalTimeout: (String verificationId){},
+                phoneNumber: _phoneControler.text.toString(),
+              );
+            }, child: Text("Send OTP."))
+          ],),),
+
+          SizedBox(height: 20,),
+
+
+          ///Verify OTP
+          Container(child: Row(children: [
+            SizedBox( width: MediaQuery.of(context).size.width *0.7 ,child: TextField(
+              controller: _otpControler,
+              decoration: InputDecoration(
+                labelText: 'Enter Otp',
+                border: OutlineInputBorder(),
+              ),
+            ),),
+            SizedBox(width: 10,),
+
+            ElevatedButton(onPressed: () async {
+              try{
+                PhoneAuthCredential credential = await PhoneAuthProvider.credential(
+                    verificationId: mVerificationID,
+                    smsCode: _otpControler.text.toString());
+                FirebaseAuth.instance.signInWithCredential(credential).then((value) {ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Mobile no verified successfuly ")));} );
+              } catch (ex){
+                print(ex.toString());
+              }
+
+            }, child: Text("Verify OTP",style: TextStyle(color: Colors.green),))
+          ],),),
+
           SizedBox(height: 20,),
 
           ElevatedButton(
@@ -67,6 +123,7 @@ class _SignUpState extends State<SignUp> {
                    "emial": usercred.user!.email,
                    "name" : _nameControler.text,
                    "pass": _passControler.text ,
+                   "mobile" : _phoneControler.text,
                    "createdAt" : createdAt,
                  });
                 Navigator.pop(context);
