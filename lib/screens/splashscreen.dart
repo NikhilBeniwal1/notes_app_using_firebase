@@ -25,13 +25,19 @@ class _SplashPageState extends State<SplashPage> {
 
       bool? checkLogin = prefs.getBool(LoginPage.LOGIN_PREF_KEY);
 
+      String? checkPhoneAuth = prefs.getString("userId");
       Widget navigateTO = LoginPage();
 
 
       if(checkLogin!=null && checkLogin){
+        print("$checkLogin 555..");
+
         navigateTO = HomeScreen(userID: auth.currentUser!.uid);
       }
+      if(checkPhoneAuth!.isNotEmpty){
 
+        navigateTO = HomeScreen(userID: auth.currentUser!.uid);
+      }
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(

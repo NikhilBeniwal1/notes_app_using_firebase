@@ -200,6 +200,7 @@ Navigator.pop(context);
           ],
         ),
       ),
+floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 floatingActionButton: FloatingActionButton(onPressed: (){
   showModelBottomSheet ();
 },
