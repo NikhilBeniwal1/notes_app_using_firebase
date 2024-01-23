@@ -298,7 +298,7 @@ Text("Add New Notes.",style: TextStyle(color: Colors.green,fontSize: 30),),
     InkWell(
       onTap: () async {
         var pref = await SharedPreferences.getInstance();
-        pref.setBool(LoginPage.LOGIN_PREF_KEY, false);
+        pref.setString("userId", "");
         Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => LoginPage(),));
 
       },

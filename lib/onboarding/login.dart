@@ -57,19 +57,13 @@ class LoginPage extends StatelessWidget {
                      },));
                      // when user loged in
                      var prefs = await SharedPreferences.getInstance();
-   prefs.setBool(LOGIN_PREF_KEY, true);
+
+   prefs.setString("userId", usercred.user!.uid);
 
                   } on FirebaseAuthException catch (e){
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error occord : $e")));
 
-                 /* if (e.code == 'weak-password') {
-                    print('The password provided is too weak.');
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("The password provided is too weak.")));
-                  } else if (e.code == 'email-already-in-use') {
-                    print('The account already exists for that email.');
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("The account already exists for that email.")));
 
-                  }*/
                 } catch (e){
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error : $e")));
 

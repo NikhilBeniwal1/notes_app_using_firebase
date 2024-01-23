@@ -23,21 +23,22 @@ class _SplashPageState extends State<SplashPage> {
       var auth = FirebaseAuth.instance;
       var prefs = await SharedPreferences.getInstance();
 
-      bool? checkLogin = prefs.getBool(LoginPage.LOGIN_PREF_KEY);
+
 
       String? checkPhoneAuth = prefs.getString("userId");
-      Widget navigateTO = LoginPage();
+//      Widget navigateTO = LoginPage();
+
+    late  Widget navigateTO ;
 
 
-      if(checkLogin!=null && checkLogin){
-        print("$checkLogin 555..");
+    if(checkPhoneAuth == null || checkPhoneAuth == ""){
+      navigateTO = LoginPage();
 
-        navigateTO = HomeScreen(userID: auth.currentUser!.uid);
-      }
-      if(checkPhoneAuth!.isNotEmpty){
+    }else if(checkPhoneAuth!.isNotEmpty && checkPhoneAuth != "" ){
+  navigateTO = HomeScreen(userID: auth.currentUser!.uid);
+ }
 
-        navigateTO = HomeScreen(userID: auth.currentUser!.uid);
-      }
+
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
