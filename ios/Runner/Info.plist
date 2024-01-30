@@ -45,5 +45,13 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To pick user profile pic</string>
+
+	<key>NSCameraUsageDescription</key>
+	<string>To pick user specific image</string>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To pick user specific video with audio</string>
 </dict>
 </plist>

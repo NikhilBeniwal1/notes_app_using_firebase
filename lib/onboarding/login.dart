@@ -2,6 +2,9 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:notes_app_firebase/custom_widgets/custom_elevatedbutton.dart';
+import 'package:notes_app_firebase/custom_widgets/custom_textfield.dart';
+import 'package:notes_app_firebase/custom_widgets/custom_textformfield.dart';
 
 import 'package:notes_app_firebase/onboarding/phone_screen.dart';
 import 'package:notes_app_firebase/onboarding/signup.dart';
@@ -24,54 +27,44 @@ class LoginPage extends StatelessWidget {
 
           Text("Hi , Wellcome back",style: TextStyle(fontSize: 30),),
           SizedBox(height: 20,),
-          TextField(
-            controller: _emailControler,
-            decoration: InputDecoration(
-              labelText: 'email',
-              border: OutlineInputBorder(),
-            ),
-          ),
+
+/// Enter Email id here
+          CustomTextFormField(controller: _emailControler, hintText: "Enter your email", lableText: "Email", validatorText: "pls enter valid input" ,suffixIcon: Icon(Icons.email),),
+          SizedBox(height: 20,),
+          /// Enter password here
+          CustomTextFormField(controller: _passControler, hintText: "Enter password", lableText: "Password", validatorText: "pls enter valid input" ,suffixIcon: Icon(Icons.password),obscureText: true,),
+
 
           SizedBox(height: 20,),
-          TextField(
-            controller: _passControler,
-            decoration: InputDecoration(
-              labelText: 'Password',
-              border: OutlineInputBorder(),
-            ),
-          ),
+
           SizedBox(height: 20,),
+         /// login button
+         CustomElevatedButton(onPressed:  () async {
+           var auth = FirebaseAuth.instance;
 
-          ElevatedButton(
+           try {
+             var usercred = await  auth.signInWithEmailAndPassword(
+                 email: _emailControler.text,
+                 password: _passControler.text);
+             /// shared pref here
+             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+               return HomeScreen(userID: usercred.user!.uid);
+             },));
+             // when user loged in
+             var prefs = await SharedPreferences.getInstance();
 
-              onPressed: () async {
-                var auth = FirebaseAuth.instance;
+             prefs.setString("userId", usercred.user!.uid);
 
-                try {
-                  var usercred = await  auth.signInWithEmailAndPassword(
-                        email: _emailControler.text,
-                        password: _passControler.text);
-                  /// shared pref here
-                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-                       return HomeScreen(userID: usercred.user!.uid);
-                     },));
-                     // when user loged in
-                     var prefs = await SharedPreferences.getInstance();
-
-   prefs.setString("userId", usercred.user!.uid);
-
-                  } on FirebaseAuthException catch (e){
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error occord : $e")));
+           } on FirebaseAuthException catch (e){
+             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error occord : $e")));
 
 
-                } catch (e){
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error : $e")));
+           } catch (e){
+             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error : $e")));
 
-                }
-                },
-               style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.green.shade400),foregroundColor: MaterialStateProperty.all(Colors.white)),
-              child: Text("      Login Now       ")
-          ),
+           }
+         }, buttonText: "login now",textcolor: Colors.white,width: 150,height: 36,borderRadius: 30),
+
 SizedBox(height: 20,),
           Divider(),
           Text("Or",style: TextStyle(color: Colors.black),),
